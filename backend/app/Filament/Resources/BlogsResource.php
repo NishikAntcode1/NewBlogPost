@@ -9,6 +9,7 @@ use App\Models\Category;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -30,46 +31,53 @@ class BlogsResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Card::make()->schema([
- 
+
                     // Filament\Infolists\Components\Section::make('Title Section')
                     //     ->schema([
-                            
+
                     //     ])->columns(2),
 
 
                     Forms\Components\TextInput::make('title')
-                    ->reactive()
-                    ->afterStateUpdated(function ( $set, $state) {
-                        $set('blog_title_slug', Str::slug($state));
-                    })->required(),
+                        ->reactive()->afterStateUpdated(fn (Set $set, ?string $state) => $set('blog_title_slug', Str::slug($state)))
+                        ->required(),
                     Forms\Components\TextInput::make('blog_title_slug')->required()->readOnly(),
-                
-                    Forms\Components\Textarea::make('short_description')->rows(4)->required(),
-                    Forms\Components\RichEditor::make('long_description')->required()
-                    ->toolbarButtons([
-                        'blockquote',
-                        'bold',
-                        'bulletList',
-                        'h2',
-                        'italic',
-                        'redo',
-                        'underline',
-                        'undo',
-                    ])
+
+                    Forms\Components\Textarea::make('short_description')->rows(4)
+                        ->minLength(2)
+                        ->maxLength(250)
+                        ->helperText('must be under 250 characters')
+                        ->required(),
+                    Forms\Components\RichEditor::make('long_description')->minlength(250)->required()
+                        ->toolbarButtons([
+                            'blockquote',
+                            'bold',
+                            'bulletList',
+                            'h2',
+                            'italic',
+                            'redo',
+                            'underline',
+                            'undo',
+                        ])
                 ])->columnSpan(2),
 
 
                 Forms\Components\Card::make()->schema([
 
-                            Forms\Components\FileUpload::make('blog_image')->image()->required()
-                                ->visibility('private'),
-                            Forms\Components\TextInput::make('blog_video_link')->required(),  //->readOnly()
-                            Forms\Components\Select::make('category_id')->label('Parent Category')->options(function () {
-                                return Category::all()->pluck('name', 'id');
-                            }),
-                        ])->columnSpan(2)
+                    Forms\Components\FileUpload::make('blog_image')->image()->required()
+                        ->visibility('private'),
+                    Forms\Components\TextInput::make('blog_video_link')->required(),  //->readOnly()
+                    // Forms\Components\Grid::make()
+                    // ->schema([
+                    Forms\Components\Select::make('category_id')->label('Category')->options(function () {
+                        return Category::all()->pluck('name', 'id');
+                    })->required(),
+                    Forms\Components\Toggle::make('is_active')->inline(false)->required()
+                    // ])
 
-                
+                ])->columnSpan(2)
+
+
             ])->columns(4);
     }
 
@@ -84,6 +92,10 @@ class BlogsResource extends Resource
                 Tables\Columns\TextColumn::make('short_description')->limit(20),
                 Tables\Columns\TextColumn::make('blogCategory.name'),
                 Tables\Columns\TextColumn::make('updated_at')->dateTime(),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->boolean()
+                    ->trueColor('primary')
+                    ->falseColor('warning')
             ])
             ->filters([
                 //
@@ -97,14 +109,14 @@ class BlogsResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -112,5 +124,5 @@ class BlogsResource extends Resource
             'create' => Pages\CreateBlogs::route('/create'),
             'edit' => Pages\EditBlogs::route('/{record}/edit'),
         ];
-    }    
+    }
 }

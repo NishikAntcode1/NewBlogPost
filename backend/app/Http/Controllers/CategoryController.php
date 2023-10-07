@@ -41,8 +41,31 @@ class CategoryController extends Controller
 
     public function getAllCategories()
     {
-        $categories = Category::all()->pluck('name','id')->toArray();
+        $categories = Category::all()->toArray();
         return response()->json($categories);
+    }
+
+    public function getParentCategory($categoryId) {
+        $currentCategory = Category::findOrFail($categoryId);
+        $currentCategoryParentId = $currentCategory->parent_id;
+        $parentCategory = Category::find($currentCategoryParentId);
+        
+        if ($parentCategory) {
+            return response()->json(["Current" => $currentCategory, "Parent" => $parentCategory]);
+        } else {
+            return response()->json(['Current' => $currentCategory]);
+        }
+    }
+
+    public function categoriesUsedInBlogs()
+    {
+        // Retrieve all distinct category IDs used in the "blogs" table
+        $categoryIds = BLog::distinct()->pluck('category_id');
+
+        // Get the categories based on the retrieved IDs
+        $categoriesUsedInBlogs = Category::whereIn('id', $categoryIds)->get();
+
+        return response()->json($categoriesUsedInBlogs);
     }
 
     // public function getRelatedPosts($postId)

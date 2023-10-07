@@ -21,6 +21,7 @@ class CategoriesResource extends Resource
     protected static ?string $model = Category::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $inverseRelationship = 'Category';
 
     public static function form(Form $form): Form
     {
@@ -90,7 +91,7 @@ class CategoriesResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\BlogsRelationManager::class,
         ];
     }
     

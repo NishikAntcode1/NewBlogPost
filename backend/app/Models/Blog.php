@@ -16,11 +16,17 @@ class Blog extends Model
         'long_description',
         'blog_image',
         'blog_video_link',
-        'category_id'
+        'category_id',
+        'is_active'
     ];
 
     public function blogCategory()
     {
         return $this->belongsTo(\App\Models\Category::class, 'category_id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }

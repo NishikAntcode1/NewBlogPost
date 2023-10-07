@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +21,23 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
+
+
 Route::post('/createBlog', [BlogController::class, 'createBlog']);
 Route::post('/editBlog/{id}', [BlogController::class, 'editBlog']);
 Route::post('/deleteBlog/{id}', [BlogController::class, 'deleteBlog']);
+Route::post('/getLatestBlogs', [BlogController::class, 'getLatestBlogs']);
+Route::get('/getBlogsByCategoryId/{categoryId}', [BlogController::class, 'getBlogsByCategoryId']);
+Route::get('/getBlogDetails/{blogId}', [BlogController::class, 'getBlogDetails']);
+Route::get('/getRelatedBlogs/{blogId}', [BlogController::class, 'getRelatedBlogs']);
+
+
+Route::post('/getAllCategories', [CategoryController::class, 'getAllCategories']);
+Route::get('/categoriesUsedInBlogs', [CategoryController::class, 'categoriesUsedInBlogs']);
+Route::get('/getParentCategory/{categoryId}', [CategoryController::class, 'getParentCategory']);
+
+Route::middleware(['api'])->group(function() {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/getaccount', [AuthController::class, 'getaccount']);
+});
