@@ -20,7 +20,6 @@ return new class extends Migration
             $table->longText('long_description');
             $table->string('blog_image');
             $table->string('blog_video_link');
-            // $table->foreignId('user_id')->constrained('users');
             $table->foreignId('category_id')->constrained('categories');
             $table->timestamps();
         });

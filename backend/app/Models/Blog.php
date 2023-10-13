@@ -17,7 +17,8 @@ class Blog extends Model
         'blog_image',
         'blog_video_link',
         'category_id',
-        'is_active'
+        'is_active',
+        'user_id'
     ];
 
     public function blogCategory()
@@ -28,5 +29,10 @@ class Blog extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

@@ -67,19 +67,4 @@ class CategoryController extends Controller
 
         return response()->json($categoriesUsedInBlogs);
     }
-
-    // public function getRelatedPosts($postId)
-    // {
-    //     // Get the category ID of the current post
-    //     $recipe = Blog::find($postId);
-    //     $categoryId = $recipe->category_id;
-
-    //     // Get related posts under the same category
-    //     $relatedPosts = Blog::where('category_id', $categoryId)
-    //                         ->where('id', '!=', $postId) // Exclude the current post itself
-    //                         ->get();
-
-    //     return response()->json($relatedPosts);
-    //     // You can also pass the related posts to a view and display them as needed.
-    // }
 }

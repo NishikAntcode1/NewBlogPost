@@ -6,6 +6,7 @@ use App\Filament\Resources\BlogsResource\Pages;
 use App\Filament\Resources\BlogsResource\RelationManagers;
 use App\Models\Blog;
 use App\Models\Category;
+use App\Models\User;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -53,9 +54,14 @@ class BlogsResource extends Resource
                             'blockquote',
                             'bold',
                             'bulletList',
+                            'codeBlock',
                             'h2',
+                            'h3',
                             'italic',
+                            'link',
+                            'orderedList',
                             'redo',
+                            'strike',
                             'underline',
                             'undo',
                         ])
@@ -72,6 +78,10 @@ class BlogsResource extends Resource
                     Forms\Components\Select::make('category_id')->label('Category')->options(function () {
                         return Category::all()->pluck('name', 'id');
                     })->required(),
+                    Forms\Components\Select::make('user_id')->label('User')->options(function () {
+                        return User::all()->pluck('name', 'id');
+                    })->required(),
+
                     Forms\Components\Toggle::make('is_active')->inline(false)->required()
                     // ])
 

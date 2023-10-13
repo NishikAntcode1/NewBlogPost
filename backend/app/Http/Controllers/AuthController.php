@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use JWTAuth;
@@ -14,23 +15,25 @@ class AuthController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => [ 'register']]);//login, register methods won't go through the api guard
+        $this->middleware('auth:api', ['except' => ['login', 'register']]); //login, register methods won't go through the api guard
     }
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required',
-            'password' => 'required',
+            'email' => 'required|string|email|min:6',
+            'password' => 'required|string|min:6',
         ]);
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json($validator->errors(), 402);
         }
 
-        if (! $token = auth()->attempt($validator->validated())) {
+        if (!$token = auth('api')->attempt($validator->validated(),  ['exp' => Carbon::now()->addDays(7)->timestamp])) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+        
+        $user = auth('api')->user();
 
-        return $this->respondWithToken($token);
+        return $this->respondWithToken($token, $user);
     }
 
     public function register(Request $request)
@@ -40,8 +43,8 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:100|unique:users',
             'password' => 'required|string|confirmed|min:6',
         ]);
-        if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
         }
 
         $user = User::create([
@@ -61,7 +64,9 @@ class AuthController extends Controller
 
     public function getaccount()
     {
-        return response()->json(auth()->user());
+        $user = auth()->user()->load('blogs');
+
+        return response()->json($user);
     }
 
 
@@ -71,16 +76,61 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Successfully logged out']);
     }
-    public function refresh()
-    {
-        return $this->respondWithToken(auth()->refresh());
-    }
-    protected function respondWithToken($token)
+    // public function refresh()
+    // {
+    //     return $this->respondWithToken(auth()->refresh());
+    // }
+    protected function respondWithToken($token, $user)
     {
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60 //mention the guard name inside the auth fn
+            'expires_in' => auth('api')->factory()->getTTL() * 60, //mention the guard name inside the auth fn
+            'user' => $user,
         ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        // return $request;
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|min:2|max:50',
+            'about' => 'required|string|min:10',
+            'age' => 'required|integer|min:10',
+            'profile_image' => 'required',
+            'address' => 'required|string',
+            'gender' => 'required|string',
+            'phone' => 'required|numeric|digits:10',
+            'profession' => 'required|string|min:2|max:50',
+            'qualification' => 'required|string|min:2|max:50'
+            
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        $user->update([
+            'name' => $request->input('name'),
+            'about' => $request->input('about'),
+            'age' => $request->input('age'),
+            'address' => $request->input('address'),
+            'gender' => $request->input('gender'),
+            'phone' => $request->input('phone'),
+            'profession' => $request->input('profession'),
+            'qualification' => $request->input('qualification'),
+        ]);
+
+        if ($request->hasFile('profile_image')) {
+            $profileImageName = $request->file('profile_image');
+            $fileName = time() . '_' . $profileImageName->getClientOriginalName();
+            $profileImageName->storeAs('public/images', $fileName);
+            $user->profile_image = $fileName;
+        }
+
+
+        $user->save();
+
+        return response()->json(['message' => 'Profile updated successfully', 'user' => $user]);
     }
 }
