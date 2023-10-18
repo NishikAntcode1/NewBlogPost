@@ -70,8 +70,7 @@ class BlogsResource extends Resource
 
                 Forms\Components\Card::make()->schema([
 
-                    Forms\Components\FileUpload::make('blog_image')->image()->required()
-                        ->visibility('private'),
+                    Forms\Components\FileUpload::make('blog_image')->image()->required(),
                     Forms\Components\TextInput::make('blog_video_link')->required(),  //->readOnly()
                     // Forms\Components\Grid::make()
                     // ->schema([

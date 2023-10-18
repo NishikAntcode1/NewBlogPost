@@ -110,7 +110,7 @@ class BlogController extends Controller
 
     public function getLatestBlogs()
     {
-        $latestBlogs = Blog::latest()->take(5)->where('is_active', '!=', 0)->get();;
+        $latestBlogs = Blog::with('user')->latest()->take(5)->where('is_active', '!=', 0)->get();;
         return response()->json($latestBlogs);
     }
 
@@ -129,7 +129,7 @@ class BlogController extends Controller
 
     public function getBlogDetails($blogId)
     {
-        $blog = Blog::find($blogId);
+        $blog = Blog::with('user')->with('category')->find($blogId);
         if (!$blog) {
             return response()->json(['message' => 'Category not found'], 404);
         }

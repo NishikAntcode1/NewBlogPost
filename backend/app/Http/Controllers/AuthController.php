@@ -27,7 +27,7 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 402);
         }
 
-        if (!$token = auth('api')->attempt($validator->validated(),  ['exp' => Carbon::now()->addDays(7)->timestamp])) {
+        if (!$token = auth('api')->attempt($validator->validated())) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         
@@ -85,7 +85,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60, //mention the guard name inside the auth fn
+            'expires_in' => auth('api')->factory()->getTTL(), //mention the guard name inside the auth fn
             'user' => $user,
         ]);
     }

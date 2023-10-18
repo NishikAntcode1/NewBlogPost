@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UsersResource\Pages;
 use App\Filament\Resources\UsersResource\RelationManagers;
 use App\Models\User;
+use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,6 +13,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
+
 
 class UsersResource extends Resource
 {
@@ -23,8 +26,27 @@ class UsersResource extends Resource
     {
         return $form
             ->schema([
-                //
-            ]);
+                Forms\Components\Wizard::make([
+                    Forms\Components\Wizard\Step::make('Main fields')->schema([
+                        Forms\Components\TextInput::make('name'),
+                        Forms\Components\TextInput::make('email')->required(),
+                        Forms\Components\TextInput::make('phone')->required(),
+                        Forms\Components\TextArea::make('about')->required()->rows(3)->minLength(2)->maxLength(250)->helperText('must be under 250 characters'),
+                        Forms\Components\FileUpload::make('profile_image')->required()->image(),
+                    ]),
+                    Forms\Components\Wizard\Step::make('Secondary fields')->schema([
+                        Forms\Components\TextInput::make('age')->required()->numeric(),
+                        Forms\Components\Select::make('gender')->required()->options([
+                            "Male" => "Male",
+                            "Female" => "Female",
+                            "Others" => "Others",
+                        ]),
+                        Forms\Components\TextInput::make('profession')->required(),
+                        Forms\Components\TextInput::make('qualification')->required(),
+                        Forms\Components\TextInput::make('address')->required(),
+                    ])->columns(2),
+                ])->columnSpan(3)
+            ])->columns(4);
     }
 
     public static function table(Table $table): Table
@@ -52,7 +74,7 @@ class UsersResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\BlogsRelationManager::class,
         ];
     }
     
